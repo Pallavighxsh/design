@@ -59,7 +59,7 @@
 <div><form class="contact-form" id="contactForm">
 <div class="form-row"><input type="text" id="fn" placeholder="your name" required><input type="email" id="fe" placeholder="your email" required></div>
 <textarea id="fm" placeholder="tell me about your brand" required></textarea>
-<div class="form-footer"><span class="form-note">Opens your email app with the message ready to send.</span><button type="submit" class="contact-btn btn-primary">send message →</button></div></form></div>
+<div class="form-footer"><span class="form-note">Your message is important to me. Please wait 24 hours so that I can give a thoughtful reply.</span><button type="submit" class="contact-btn btn-primary">send message →</button></div></form></div>
 </div>
 <div class="card footer-bottom"><p>© 2026 Pallavi Ghosh · designed in Inkscape, Adobe Express and a lot of colour</p></div>
 </div></footer>
@@ -122,6 +122,49 @@
     if (e.key === 'Escape') close();
     else if (e.key === 'ArrowLeft') show(idx - 1);
     else if (e.key === 'ArrowRight') show(idx + 1);
+  });
+})();
+  (function () {
+  var form = document.getElementById('contactForm');
+  if (!form) return;
+  var btn = form.querySelector('.contact-btn');
+  var note = form.querySelector('.form-note');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'sending…';
+
+    fetch('https://formsubmit.co/ajax/pallavighosh09@gmail.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('fn').value,
+        email: document.getElementById('fe').value,
+        message: document.getElementById('fm').value,
+        _subject: 'New message from your portfolio',
+        _replyto: document.getElementById('fe').value,
+        _captcha: 'false'
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.success === 'true' || data.success === true) {
+          form.reset();
+          btn.textContent = 'sent ✓';
+          note.textContent = 'Thanks! Your message is on its way.';
+        } else {
+          throw new Error('failed');
+        }
+      })
+      .catch(function () {
+        btn.textContent = original;
+        note.textContent = 'Something went wrong. Please email me directly at pallavighosh09@gmail.com.';
+      })
+      .finally(function () {
+        setTimeout(function () { btn.disabled = false; btn.textContent = original; }, 3000);
+      });
   });
 })();
 </script>
